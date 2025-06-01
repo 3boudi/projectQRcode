@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QR Code Generator</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            padding: 40px;
+            text-align: center;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            max-width: 500px;
+            width: 100%;
+        }
+
+        h1 {
+            color: white;
+            margin-bottom: 30px;
+            font-size: 2.2em;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        .qr-container {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            margin: 30px 0;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+            display: inline-block;
+        }
+
+        #qrcode {
+            margin: 0 auto;
+        }
+
+        .url-display {
+            background: rgba(255, 255, 255, 0.9);
+            padding: 15px;
+            border-radius: 10px;
+            margin: 20px 0;
+            word-break: break-all;
+            font-family: 'Courier New', monospace;
+            color: #333;
+            font-size: 14px;
+        }
+
+        .download-btn {
+            background: linear-gradient(45deg, #ff6b6b, #ee5a24);
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 25px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin: 10px;
+            box-shadow: 0 4px 15px rgba(238, 90, 36, 0.4);
+        }
+
+        .download-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(238, 90, 36, 0.6);
+        }
+
+        .link-selector {
+            margin-bottom: 30px;
+        }
+
+        select {
+            background: rgba(255, 255, 255, 0.9);
+            border: none;
+            padding: 12px 20px;
+            border-radius: 10px;
+            font-size: 16px;
+            color: #333;
+            cursor: pointer;
+            min-width: 300px;
+        }
+
+        .info {
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 14px;
+            margin-top: 20px;
+            line-height: 1.4;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🛒 QR Code Generator</h1>
+        
+        <div class="link-selector">
+            <select id="linkSelect" onchange="generateQR()">
+                <option value="https://hepermarket-shopping.netlify.app/">Live App - Hypermarket Shopping</option>
+                <option value="https://github.com/nerddude24/cashier-front">GitHub - Cashier Frontend</option>
+                <option value="https://github.com/djasserdz/hypermarket-sales-management-system/tree/fucked">GitHub - Sales Management System</option>
+            </select>
+        </div>
+
+        <div class="qr-container">
+            <div id="qrcode"></div>
+        </div>
+
+        <div class="url-display" id="currentUrl">
+            https://hepermarket-shopping.netlify.app/
+        </div>
+
+        <button class="download-btn" onclick="downloadQR()">
+            📱 Download QR Code
+        </button>
+
+        <div class="info">
+            Scan the QR code with your phone camera to quickly access the hypermarket shopping application!
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrious/4.0.2/qrious.min.js"></script>
+    <script>
+        let currentQR = null;
+
+        function generateQR() {
+            const select = document.getElementById('linkSelect');
+            const url = select.value;
+            document.getElementById('currentUrl').textContent = url;
+
+            // Clear previous QR code
+            document.getElementById('qrcode').innerHTML = '';
+
+            // Generate new QR code
+            currentQR = new QRious({
+                element: document.getElementById('qrcode'),
+                value: url,
+                size: 250,
+                level: 'H',
+                foreground: '#2c3e50',
+                background: '#ffffff'
+            });
+
+            // Create canvas element for QR code
+            const canvas = document.createElement('canvas');
+            canvas.width = 250;
+            canvas.height = 250;
+            const ctx = canvas.getContext('2d');
+            
+            // Clear and redraw
+            ctx.fillStyle = '#ffffff';
+            ctx.fillRect(0, 0, 250, 250);
+            
+            // Generate QR using QRious library
+            const qr = new QRious({
+                value: url,
+                size: 250,
+                level: 'H'
+            });
+            
+            const img = new Image();
+            img.onload = function() {
+                ctx.drawImage(img, 0, 0);
+            };
+            img.src = qr.toDataURL();
+            
+            document.getElementById('qrcode').innerHTML = '';
+            document.getElementById('qrcode').appendChild(canvas);
+            currentQR = canvas;
+        }
+
+        function downloadQR() {
+            if (currentQR) {
+                const link = document.createElement('a');
+                link.download = 'hypermarket-qr-code.png';
+                link.href = currentQR.toDataURL();
+                link.click();
+            }
+        }
+
+        // Generate initial QR code
+        generateQR();
+    </script>
+</body>
+</html>
